@@ -1,0 +1,90 @@
+version: "3.7"
+
+volumes:
+  letsencrypt:
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "4"
+
+services:
+  proxy:
+    image: jonasal/nginx-certbot:4.3.0-nginx1.25.1-alpine
+    environment:
+      CERTBOT_EMAIL: developer@example.com
+      USE_LOCAL_CA: 1
+      STAGING: 1
+      NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE: 1
+    ports:
+      - "80:8080"
+      - "443:8443"
+    volumes:
+      - ./nginx/nginx_internal.conf:/etc/nginx/user_conf.d/nginx.conf:ro,Z
+      - ./nginx/proxy_params:/etc/nginx/proxy_params:ro,Z
+      - letsencrypt:/etc/letsencrypt
+    restart: always
+    logging: *default-logging
+    depends_on:
+      ui:
+        condition: service_healthy
+
+  maindb:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+    restart: always
+    logging: *default-logging
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 15s
+      timeout: 20s
+      retries: 3
+      start_period: 60s
+
+  pictrs:
+    image: docker.io/asonix/pictrs:0.4.3
+    hostname: pictrs
+    # we can set options to pictrs like this, here we set max. image size and forced format for conversion
+    # entrypoint: /sbin/tini -- /usr/local/bin/pict-rs -p /mnt -m 4 --image-format webp
+    user: 991:991
+    restart: always
+    logging: *default-logging
+
+  queue:
+    image: rabbitmq:3-management
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=sublinks
+      - RABBITMQ_DEFAULT_PASS=sublinks
+    ports:
+      - "15672:15672"
+    logging: *default-logging
+    volumes:
+      - ./queue/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./queue/definitions.json:/etc/rabbitmq/definitions.json:ro
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "node_health_check" ]
+      interval: 30s # See https://github.com/docker-library/rabbitmq/pull/174#issuecomment-452002696
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+  seeder:
+    image: node:20-alpine
+    working_dir: /job
+    volumes:
+      - ./seeder/.:/job/.
+    command: sh -c "npm i && npm run seed"
+    environment:
+      - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=http://sublinks:8080
+    logging: *default-logging
+    depends_on:
+      sublinks:
+        condition: service_healthy
+
