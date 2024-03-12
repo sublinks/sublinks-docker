@@ -1,0 +1,8 @@
+version: "3.7"
+
+include:
+  - common/services.yml
+  - backend/services.yml
+  - federation/services.yml
+  - frontend/services.yml
+
