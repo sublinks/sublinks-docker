@@ -1,0 +1,30 @@
+version: "3.7"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "4"
+
+services:
+  ui:
+    image: dessalines/lemmy-ui:0.19.3
+    environment:
+      #- LEMMY_UI_DEBUG=true
+      - LEMMY_UI_HOST=0.0.0.0:3000
+      - LEMMY_UI_DISABLE_CSP=true
+      - LEMMY_UI_LEMMY_INTERNAL_HOST=sublinks:8080
+      - LEMMY_UI_LEMMY_EXTERNAL_HOST=demo.sublinks.org
+    restart: always
+    logging: *default-logging
+    depends_on:
+      sublinks:
+        condition: service_healthy
+      federation:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
