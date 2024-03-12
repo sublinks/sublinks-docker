@@ -1,0 +1,42 @@
+version: "3.7"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "4"
+
+services:
+  sublinks:
+    image: ghcr.io/sublinks/sublinks-api:0.0.1-snapshot
+    restart: always
+    environment:
+      SUBLINKS_DB_URL: jdbc:mysql://maindb:3306/backend
+      SUBLINKS_DB_USERNAME: backend
+      SUBLINKS_DB_PASSWORD: backend
+      SUBLINKS_JWT_SECRET: YouShouldChangeThisItJustNeedsToBe64charactersLongUsingAlphaNum1
+      SUBLINKS_BASE_URL: https://demo.sublinks.org
+      SUBLINKS_PICTRS_URL: http://pictrs:8080
+      FEDERATION_QUEUE_HOST: queue
+      FEDERATION_QUEUE_PORT: 5672
+      FEDERATION_QUEUE_USER: sublinks
+      FEDERATION_QUEUE_PASS: sublinks
+      FEDERATION_QUEUE_NAME: federation
+      FEDERATION_EXCHANGE_NAME: federation
+      BACKEND_QUEUE_NAME: backend
+      BACKEND_TOPIC_NAME: backend
+    logging: *default-logging
+    depends_on:
+      maindb:
+        condition: service_healthy
+      queue:
+        condition: service_healthy
+      pictrs: # NOTE: condition is different because of lack of healthcheck
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "echo", "-n", ">", "/dev/tcp/localhost/8080"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
