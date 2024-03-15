@@ -63,6 +63,7 @@ services:
       - RABBITMQ_DEFAULT_USER=sublinks
       - RABBITMQ_DEFAULT_PASS=sublinks
     ports:
+      - "5672:5672"
       - "15672:15672"
     logging: *default-logging
     volumes:
