@@ -76,16 +76,3 @@ services:
       retries: 5
       start_period: 30s
 
-  seeder:
-    image: node:20-alpine
-    working_dir: /job
-    volumes:
-      - ./seeder/.:/job/.
-    command: sh -c "npm i && npm run seed"
-    environment:
-      - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=http://sublinks:8080
-    logging: *default-logging
-    depends_on:
-      sublinks:
-        condition: service_healthy
-
