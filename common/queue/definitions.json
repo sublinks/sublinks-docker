@@ -1,0 +1,66 @@
+{
+  "rabbit_version": "3.6.6",
+  "users": [
+    {
+      "name": "admin",
+      "password_hash": "WxCGpR3PPmVtPZPZCa6Xc9QQfJrDvh20Oq5W/LpLIjASn+3Y",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    },
+    {
+      "name": "sublinks",
+      "password_hash": "SCGzTeMSLhvEJytFqJt42TB+H3iDVu3B0PKjn0cV6kNJs1j2",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": ""
+    },
+    {
+      "name": "federation",
+      "password_hash": "TF7vTDhNbHicmAqHaQuS8mpW8T5yKBlIbW2vfPS2bQbZ0Wzc",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": ""
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "sublinks",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "federation",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "parameters": [],
+  "policies": [],
+  "queues": [],
+  "exchanges": [
+    {
+      "name": "federation",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": []
+}
