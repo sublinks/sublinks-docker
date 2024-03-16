@@ -6,6 +6,9 @@ x-logging: &default-logging
     max-size: "50m"
     max-file: "4"
 
+include:
+  - common/proxy.yml
+
 services:
   ui:
     image: dessalines/lemmy-ui:0.19.3
