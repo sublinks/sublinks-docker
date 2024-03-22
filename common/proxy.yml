@@ -1,0 +1,32 @@
+version: "3.7"
+
+volumes:
+  letsencrypt:
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "4"
+
+services:
+  proxy:
+    image: jonasal/nginx-certbot:4.3.0-nginx1.25.1-alpine
+    environment:
+      CERTBOT_EMAIL: developer@example.com
+      USE_LOCAL_CA: 1
+      STAGING: 1
+      NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE: 1
+    ports:
+      - "80:8080"
+      - "443:8443"
+    volumes:
+      - ./nginx/nginx_internal.conf:/etc/nginx/user_conf.d/nginx.conf:ro,Z
+      - ./nginx/proxy_params:/etc/nginx/proxy_params:ro,Z
+      - letsencrypt:/etc/letsencrypt
+    restart: always
+    logging: *default-logging
+    depends_on:
+      ui:
+        condition: service_healthy
+
