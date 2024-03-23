@@ -8,7 +8,7 @@ x-logging: &default-logging
 
 services:
   sublinks:
-    image: ghcr.io/sublinks/sublinks-api:0.0.1-snapshot
+    image: ghcr.io/sublinks/sublinks-api:main
     restart: always
     environment:
       SUBLINKS_DB_URL: jdbc:mysql://maindb:3306/backend
