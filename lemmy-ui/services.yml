@@ -7,7 +7,7 @@ x-logging: &default-logging
     max-file: "4"
 
 include:
-  - common/proxy.yml
+  - ../common/proxy.yml
 
 services:
   ui:
