@@ -13,7 +13,8 @@ services:
     environment:
       DB_DSN: "federation:federation@tcp(maindb:3306)/federation?charset=utf8mb4&parseTime=True&loc=Local"
       AMQP_SERVER_URL: "amqp://sublinks:sublinks@queue:5672"
-      HOSTNAME: sublinks.org"
+      HOSTNAME: sublinks.org
+      LISTEN_ADDR: ":8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/"]
       interval: 15s
