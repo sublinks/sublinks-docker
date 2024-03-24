@@ -19,7 +19,7 @@ services:
     command: sh -c "npm i && npm run dev"
     environment:
       - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=sublinks:8080
-      - NEXT_PUBLIC_SUBLINKS_API_BASE_PUBLIC_URL=localhost:3000
+      - NEXT_PUBLIC_SUBLINKS_API_BASE_PUBLIC_URL=localhost
       - NEXT_PUBLIC_HTTPS_ENABLED=false
       - WATCHPACK_POLLING=true
     restart: always
