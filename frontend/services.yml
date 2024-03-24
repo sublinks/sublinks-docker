@@ -34,5 +34,7 @@ services:
     depends_on:
       sublinks:
         condition: service_healthy
+      federation:
+        condition: service_healthy
     logging: *default-logging
 
