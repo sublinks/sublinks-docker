@@ -51,6 +51,15 @@ const doesEntityAlreadyExist = async entity => {
       } catch (e) {
         return false;
       }
+    case 'createComment':
+      try {
+        await apiClient.getComment({
+          id: data.id
+        });
+        return true;
+      } catch (e) {
+        return false;
+      }
     default:
       return false;
   }
