@@ -53,6 +53,18 @@ const buildPostData = ({ name, body, url, image_url, communityName, options }) =
   };
 };
 
+let commentCounter = 0;
+const buildCommentData = ({ content, postId, parentId }) => {
+  commentCounter++;
+
+  return {
+    id: commentCounter,
+    content,
+    post_id: postId,
+    ...(parentId && { parent_id: parentId }),
+  };
+};
+
 const siteSetup = {
   adminUser: buildUser('devAdmin', { showNsfw: true }),
   siteData: {
@@ -574,6 +586,17 @@ const posts = [
   }
 ];
 
+const comments = [
+  {
+    type: 'createComment',
+    creator: users.luke,
+    data: buildCommentData({
+      postId: 33,
+      content: 'I like AI'
+    })
+  }
+];
+
 const allUsers = Object.values(users);
 const allPosts = Object.values(posts);
 const likes = [];
@@ -619,6 +642,7 @@ allPosts.forEach(post => {
 const entities = [
   ...communities,
   ...posts,
+  ...comments,
   ...likes
 ];
 
