@@ -4,5 +4,5 @@ include:
   - common/services.yml
   - backend/services.yml
   - federation/services.yml
-  - lemmy-ui/services.yml
+  - ${UI:-lemmy}-ui/services.yml
 

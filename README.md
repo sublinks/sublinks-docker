@@ -41,6 +41,8 @@ containers they are brought up in a "clean" state)
 ## Demo Site
 
 Run `docker-compose -f docker-compose.demo.yml up [-d]`
+OR to run the demo site with the Sublinks UI (currently experimental), run:
+`UI=sublinks docker-compose -f docker-compose.demo.yml up [-d]`
 
 ## Frontend Dev
 
