@@ -7,7 +7,7 @@ x-logging: &default-logging
     max-file: "4"
 
 services:
-  sublinks:
+  api:
     image: ghcr.io/sublinks/sublinks-api:main
     restart: always
     environment:
@@ -50,6 +50,6 @@ services:
       - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=http://sublinks:8080
     logging: *default-logging
     depends_on:
-      sublinks:
+      api:
         condition: service_healthy
 

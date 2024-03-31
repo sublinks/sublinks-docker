@@ -21,7 +21,7 @@ services:
     restart: always
     logging: *default-logging
     depends_on:
-      sublinks:
+      api:
         condition: service_healthy
       federation:
         condition: service_healthy
