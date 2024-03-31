@@ -37,6 +37,8 @@ Run `docker-compose -f docker-compose.frontend.yml up [-d]`
 ## Backend Dev
 
 Run `docker-compose -f docker-compose.backend.yml up [-d]`
+OR to run the Sublinks UI (currently experimental), run:
+`UI=sublinks docker-compose -f docker-compose.backend.yml up [-d]`
 
 ## Federation Dev
 
