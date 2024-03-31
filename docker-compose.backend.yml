@@ -1,0 +1,33 @@
+version: "3.7"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "4"
+
+include:
+  - common/services.yml
+  - federation/services.yml
+  - ${UI:-lemmy}-ui/services.yml
+
+services:
+  api:
+    image: busybox
+    # This is a hack since the UI requires the sublinks service to be up
+    # Just spin & wait forever
+    command: sleep infinity
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "echo", "up"]
+      start_period: 40s
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    depends_on:
+      maindb:
+        condition: service_healthy
+      queue:
+        condition: service_healthy
+      pictrs: # NOTE: condition is different because of lack of healthcheck
+        condition: service_started
