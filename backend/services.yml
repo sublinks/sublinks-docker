@@ -6,6 +6,9 @@ x-logging: &default-logging
     max-size: "50m"
     max-file: "4"
 
+include:
+  - seeder.yml
+
 services:
   api:
     image: ghcr.io/sublinks/sublinks-api:main
@@ -39,17 +42,3 @@ services:
       timeout: 5s
       retries: 5
       start_period: 40s
-
-  seeder:
-    image: node:20-alpine
-    working_dir: /job
-    volumes:
-      - ../common/seeder/.:/job/.
-    command: sh -c "npm i && npm run seed"
-    environment:
-      - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=http://sublinks:8080
-    logging: *default-logging
-    depends_on:
-      api:
-        condition: service_healthy
-

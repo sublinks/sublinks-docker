@@ -10,6 +10,7 @@ include:
   - common/services.yml
   - federation/services.yml
   - ${UI:-lemmy}-ui/services.yml
+  - backend/seeder.yml
 
 services:
   api:
