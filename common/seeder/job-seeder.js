@@ -35,28 +35,33 @@ const doesEntityAlreadyExist = async entity => {
   switch(type) {
     case 'createCommunity':
       try {
-        await apiClient.getCommunity({
+        const communityRes = await apiClient.getCommunity({
           id: data.id
         });
-        return true;
+        return !Boolean(communityRes.errors);
       } catch (e) {
         return false;
       }
     case 'createPost':
       try {
-        await apiClient.getPost({
-          id: data.id
+        const postRest = await apiClient.getPost({
+          id: parseInt(data.id, 10)
         });
-        return true;
+        return !Boolean(postRest.errors);
       } catch (e) {
         return false;
       }
     case 'createComment':
       try {
-        await apiClient.getComment({
-          id: data.id
+        const commentRes = await apiClient.getComments({
+          post_id: data.post_id
         });
-        return true;
+
+        if (Boolean(commentRes.errors)) {
+          return false;
+        }
+
+        return commentRes.comments.some(commentView => commentView.comment.id === data.id);
       } catch (e) {
         return false;
       }
@@ -67,11 +72,14 @@ const doesEntityAlreadyExist = async entity => {
 
 const createUser = async user => {
   try {
-    await apiClient.getPersonDetails({ username: user.data.username });
+    const userRes = await apiClient.getPersonDetails({ username: user.data.username });
+
+    if (userRes.errors) {
+      console.log(`Creating user with ID ${user.data.id}`);
+      await apiClient.register(user.data);
+    }
   } catch (e) {
-    // Reaching this means the user doesn't exist
-    console.log(`Creating user with ID ${user.data.id}`);
-    await apiClient.register(user.data);
+    console.log(`Failed creating user with ID ${user.data.id}`, e);
   }
 };
 
@@ -118,7 +126,7 @@ const insertSeedData = async () => {
         console.log(`Running ${type}() for entity with ID ${data.id || data.post_id}`);
 
         const { jwt } = await apiClient.login(creator.credentials);
-        await apiClient.setAuth(jwt);
+        apiClient.setAuth(jwt);
 
         if (data.image_url) {
           const fileRes = await fetch(data.image_url);
@@ -130,7 +138,10 @@ const insertSeedData = async () => {
           }
         }
 
-        await apiClient[type](data);
+        const entityFnRes = await apiClient[type](data);
+        if (entityFnRes.errors) {
+          console.log(`Failed to seed entity with ID ${data.id || data.post_id}: ${entityFnRes.message}`);
+        }
       }
     }
     console.log('Entity seeding completed!');
