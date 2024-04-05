@@ -54,6 +54,8 @@ const doesEntityAlreadyExist = async entity => {
     case 'createComment':
       try {
         const commentRes = await apiClient.getComments({
+          sort: 'Hot',
+          type_: 'All',
           post_id: data.post_id
         });
 
@@ -91,7 +93,7 @@ const runInitialSiteSetup = async () => {
 
   await createUser(adminUser);
   const { jwt } = await apiClient.login(adminUser.credentials);
-  await apiClient.setAuth(jwt);
+  apiClient.setAuth(jwt);
 
   if (!isSiteSetUp) {
     await apiClient.createSite(siteData);
