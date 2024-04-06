@@ -14,8 +14,10 @@ services:
       - ../common/seeder/.:/job/.
     command: sh -c "npm i && npm run seed"
     environment:
-      - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=http://sublinks:8080
+      - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=http://${API_HOST:-sublinks}:8080
     logging: *default-logging
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       api:
         condition: service_healthy
