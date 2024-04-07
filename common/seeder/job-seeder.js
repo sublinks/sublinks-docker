@@ -78,7 +78,11 @@ const createUser = async user => {
 
     if (userRes.errors) {
       console.log(`Creating user with ID ${user.data.id}`);
-      await apiClient.register(user.data);
+      const registerRes = await apiClient.register(user.data);
+
+      if (registerRes.errors) {
+        throw Error(`User registration request failed: ${registerRes.message} -- ${JSON.stringify(registerRes.errors)}`);
+      }
     }
   } catch (e) {
     console.log(`Failed creating user with ID ${user.data.id}`, e);
@@ -96,7 +100,11 @@ const runInitialSiteSetup = async () => {
   apiClient.setAuth(jwt);
 
   if (!isSiteSetUp) {
-    await apiClient.createSite(siteData);
+    const siteRes = await apiClient.createSite(siteData);
+
+    if (siteRes.errors) {
+      throw Error(`Site creation failed: ${siteRes.message} -- ${JSON.stringify(siteRes.errors)}`);
+    }
   }
 
   console.log('Site configuration completed!');
@@ -133,10 +141,12 @@ const insertSeedData = async () => {
         if (data.image_url) {
           const fileRes = await fetch(data.image_url);
           const fileBuffer = Buffer.from(await fileRes.arrayBuffer());
-          const upload = await apiClient.uploadImage({ image: fileBuffer });
+          const uploadRes = await apiClient.uploadImage({ image: fileBuffer });
 
-          if (upload.url) {
-            data.url = upload.url;
+          if (uploadRes.url) {
+            data.url = uploadRes.url;
+          } else if (uploadRes.errors) {
+            console.log(`Failed uploading image for post ${data.id}: ${uploadRes.message} -- ${JSON.stringify(uploadRes.errors)}`);
           }
         }
 
