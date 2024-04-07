@@ -9,6 +9,9 @@ const apiClient = new SublinksClient(NEXT_PUBLIC_SUBLINKS_API_BASE_URL, { insecu
 
 const MAX_ATTEMPTS = 20;
 const RETRY_DELAY = 5000;
+const commentsCache = {};
+const likesCache = {};
+let adminJwt;
 let attempt = 1;
 
 const waitForApi = async seedFn => {
@@ -31,6 +34,7 @@ const waitForApi = async seedFn => {
 
 const doesEntityAlreadyExist = async entity => {
   const { creator, data, type } = entity;
+  const postId = data.post_id;
 
   switch(type) {
     case 'createCommunity':
@@ -53,31 +57,43 @@ const doesEntityAlreadyExist = async entity => {
       }
     case 'createComment':
       try {
-        const commentRes = await apiClient.getComments({
-          sort: 'Hot',
-          type_: 'All',
-          post_id: data.post_id
-        });
+        if (!commentsCache[postId]) {
+          const commentRes = await apiClient.getComments({
+            sort: 'Hot',
+            type_: 'All',
+            post_id: postId,
+            limit: 50
+          });
 
-        if (Boolean(commentRes.errors)) {
+          commentsCache[postId] = commentRes.comments;
+        }
+
+        if (!commentsCache[postId] || commentsCache[postId].length === 0) {
           return false;
         }
 
-        return commentRes.comments.some(commentView => commentView.comment.id === data.id);
+        return commentsCache[postId].some(commentView => commentView.comment.id === data.id);
       } catch (e) {
         return false;
       }
     case 'likePost':
       try {
-        const likesRes = await apiClient.listPostLikes({
-          post_id: data.post_id
-        });
+        if (!likesCache[postId]) {
+          // API gets upset if non-admins fetch likes for too many posts
+          apiClient.setAuth(adminJwt);
 
-        if (Boolean(likesRes.errors)) {
+          const likesRes = await apiClient.listPostLikes({
+            post_id: postId
+          });
+
+          likesCache[postId] = likesRes.post_likes;
+        }
+
+        if (!likesCache[postId] || likesCache[postId].length === 0) {
           return false;
         }
 
-        return likesRes.post_likes.some(voteView => voteView.creator.id === creator.data.id);
+        return likesCache[postId].some(voteView => voteView.creator.id === creator.data.id);
       } catch (e) {
         return false;
       }
@@ -112,6 +128,7 @@ const runInitialSiteSetup = async () => {
   await createUser(adminUser);
   const { jwt } = await apiClient.login(adminUser.credentials);
   apiClient.setAuth(jwt);
+  adminJwt = jwt;
 
   if (!isSiteSetUp) {
     const siteRes = await apiClient.createSite(siteData);
