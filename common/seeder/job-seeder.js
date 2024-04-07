@@ -183,7 +183,7 @@ const insertSeedData = async () => {
 
         const entityFnRes = await apiClient[type](data);
         if (entityFnRes.errors) {
-          console.log(`Failed to seed entity with ID ${data.id || data.post_id}: ${entityFnRes.message}`);
+          console.log(`Failed to seed entity with ID ${data.id || data.post_id}: ${entityFnRes.message} -- ${JSON.stringify(uploadRes.errors)}`);
         }
       }
     }
