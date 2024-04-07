@@ -1,5 +1,6 @@
 * @sublinks/core-developers
 frontend/ @sublinks/sublinks-frontend-service @sublinks/core-developers 
+sublinks-ui/ @sublinks/sublinks-frontend-service @sublinks/core-developers 
 common/seeder/ @sublinks/sublinks-frontend-service @sublinks/core-developers 
 docker-compose.frontend.yml @sublinks/sublinks-frontend-service @sublinks/core-developers 
 federation/ @sublinks/sublinks-federation-service @sublinks/core-developers

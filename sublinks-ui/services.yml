@@ -1,0 +1,32 @@
+version: "3.7"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "4"
+
+include:
+  - ../common/proxy.yml
+
+services:
+  ui:
+    image: ghcr.io/sublinks/sublinks-frontend:main
+    environment:
+      - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=sublinks:8080
+      - NEXT_PUBLIC_SUBLINKS_API_BASE_PUBLIC_URL=demo.sublinks.org
+      - NEXT_PUBLIC_HTTPS_ENABLED=true
+    restart: always
+    logging: *default-logging
+    depends_on:
+      sublinks:
+        condition: service_healthy
+      federation:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+      start_period: 10s
+      interval: 30s
+      timeout: 60s
+      retries: 3
+
