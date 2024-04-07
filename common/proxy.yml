@@ -17,6 +17,7 @@ services:
       USE_LOCAL_CA: 1
       STAGING: 1
       NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE: 1
+      API_HOST: ${API_HOST:-sublinks}
     ports:
       - "80:8080"
       - "443:8443"
@@ -26,7 +27,8 @@ services:
       - letsencrypt:/etc/letsencrypt
     restart: always
     logging: *default-logging
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       ui:
         condition: service_healthy
-
