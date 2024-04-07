@@ -30,7 +30,7 @@ const waitForApi = async seedFn => {
 };
 
 const doesEntityAlreadyExist = async entity => {
-  const { data, type } = entity;
+  const { creator, data, type } = entity;
 
   switch(type) {
     case 'createCommunity':
@@ -64,6 +64,20 @@ const doesEntityAlreadyExist = async entity => {
         }
 
         return commentRes.comments.some(commentView => commentView.comment.id === data.id);
+      } catch (e) {
+        return false;
+      }
+    case 'likePost':
+      try {
+        const likesRes = await apiClient.listPostLikes({
+          post_id: data.post_id
+        });
+
+        if (Boolean(likesRes.errors)) {
+          return false;
+        }
+
+        return likesRes.post_likes.some(voteView => voteView.creator.id === creator.data.id);
       } catch (e) {
         return false;
       }
