@@ -11,7 +11,9 @@ x-logging: &default-logging
 
 services:
   proxy:
-    image: jonasal/nginx-certbot:4.3.0-nginx1.25.1-alpine
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     environment:
       CERTBOT_EMAIL: developer@example.com
       USE_LOCAL_CA: 1
