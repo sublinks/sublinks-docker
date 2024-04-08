@@ -32,6 +32,16 @@ const waitForApi = async seedFn => {
   }
 };
 
+const createSeedingPromise = fn =>
+  new Promise(async (resolve, reject) => {
+    try {
+      await fn();
+      resolve();
+    } catch (e) {
+      reject(e);
+    }
+  });
+
 const doesEntityAlreadyExist = async entity => {
   const { creator, data, type } = entity;
   const postId = data.post_id;
@@ -147,14 +157,17 @@ const insertSeedData = async () => {
 
     const userKeys = Object.keys(users);
     const entityKeys = Object.keys(entities);
+    const userCreationPromises = [];
 
     console.log('Seeding users...');
     for (let i = 0; i < userKeys.length; i++) {
       const userKey = userKeys[i];
       const user = users[userKey];
 
-      await createUser(user);
+      userCreationPromises.push(createSeedingPromise(() => createUser(user)));
     }
+
+    await Promise.allSettled(userCreationPromises);
     console.log('User seeding completed!');
 
     console.log('Seeding entities...');
