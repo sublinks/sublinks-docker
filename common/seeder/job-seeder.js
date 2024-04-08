@@ -9,6 +9,9 @@ const apiClient = new SublinksClient(NEXT_PUBLIC_SUBLINKS_API_BASE_URL, { insecu
 
 const MAX_ATTEMPTS = 20;
 const RETRY_DELAY = 5000;
+const commentsCache = {};
+const likesCache = {};
+let adminJwt;
 let attempt = 1;
 
 const waitForApi = async seedFn => {
@@ -30,33 +33,67 @@ const waitForApi = async seedFn => {
 };
 
 const doesEntityAlreadyExist = async entity => {
-  const { data, type } = entity;
+  const { creator, data, type } = entity;
+  const postId = data.post_id;
 
   switch(type) {
     case 'createCommunity':
       try {
-        await apiClient.getCommunity({
+        const communityRes = await apiClient.getCommunity({
           id: data.id
         });
-        return true;
+        return !Boolean(communityRes.errors);
       } catch (e) {
         return false;
       }
     case 'createPost':
       try {
-        await apiClient.getPost({
-          id: data.id
+        const postRest = await apiClient.getPost({
+          id: parseInt(data.id, 10)
         });
-        return true;
+        return !Boolean(postRest.errors);
       } catch (e) {
         return false;
       }
     case 'createComment':
       try {
-        await apiClient.getComment({
-          id: data.id
-        });
-        return true;
+        if (!commentsCache[postId]) {
+          const commentRes = await apiClient.getComments({
+            sort: 'Hot',
+            type_: 'All',
+            post_id: postId,
+            limit: 50
+          });
+
+          commentsCache[postId] = commentRes.comments;
+        }
+
+        if (!commentsCache[postId] || commentsCache[postId].length === 0) {
+          return false;
+        }
+
+        return commentsCache[postId].some(commentView => commentView.comment.id === data.id);
+      } catch (e) {
+        return false;
+      }
+    case 'likePost':
+      try {
+        if (!likesCache[postId]) {
+          // API gets upset if non-admins fetch likes for too many posts
+          apiClient.setAuth(adminJwt);
+
+          const likesRes = await apiClient.listPostLikes({
+            post_id: postId
+          });
+
+          likesCache[postId] = likesRes.post_likes;
+        }
+
+        if (!likesCache[postId] || likesCache[postId].length === 0) {
+          return false;
+        }
+
+        return likesCache[postId].some(voteView => voteView.creator.id === creator.data.id);
       } catch (e) {
         return false;
       }
@@ -67,11 +104,18 @@ const doesEntityAlreadyExist = async entity => {
 
 const createUser = async user => {
   try {
-    await apiClient.getPersonDetails({ username: user.data.username });
+    const userRes = await apiClient.getPersonDetails({ username: user.data.username });
+
+    if (userRes.errors) {
+      console.log(`Creating user with ID ${user.data.id}`);
+      const registerRes = await apiClient.register(user.data);
+
+      if (registerRes.errors) {
+        throw Error(`User registration request failed: ${registerRes.message} -- ${JSON.stringify(registerRes.errors)}`);
+      }
+    }
   } catch (e) {
-    // Reaching this means the user doesn't exist
-    console.log(`Creating user with ID ${user.data.id}`);
-    await apiClient.register(user.data);
+    console.log(`Failed creating user with ID ${user.data.id}`, e);
   }
 };
 
@@ -83,10 +127,15 @@ const runInitialSiteSetup = async () => {
 
   await createUser(adminUser);
   const { jwt } = await apiClient.login(adminUser.credentials);
-  await apiClient.setAuth(jwt);
+  apiClient.setAuth(jwt);
+  adminJwt = jwt;
 
   if (!isSiteSetUp) {
-    await apiClient.createSite(siteData);
+    const siteRes = await apiClient.createSite(siteData);
+
+    if (siteRes.errors) {
+      throw Error(`Site creation failed: ${siteRes.message} -- ${JSON.stringify(siteRes.errors)}`);
+    }
   }
 
   console.log('Site configuration completed!');
@@ -118,19 +167,24 @@ const insertSeedData = async () => {
         console.log(`Running ${type}() for entity with ID ${data.id || data.post_id}`);
 
         const { jwt } = await apiClient.login(creator.credentials);
-        await apiClient.setAuth(jwt);
+        apiClient.setAuth(jwt);
 
         if (data.image_url) {
           const fileRes = await fetch(data.image_url);
           const fileBuffer = Buffer.from(await fileRes.arrayBuffer());
-          const upload = await apiClient.uploadImage({ image: fileBuffer });
+          const uploadRes = await apiClient.uploadImage({ image: fileBuffer });
 
-          if (upload.url) {
-            data.url = upload.url;
+          if (uploadRes.url) {
+            data.url = uploadRes.url;
+          } else if (uploadRes.errors) {
+            console.log(`Failed uploading image for post ${data.id}: ${uploadRes.message} -- ${JSON.stringify(uploadRes.errors)}`);
           }
         }
 
-        await apiClient[type](data);
+        const entityFnRes = await apiClient[type](data);
+        if (entityFnRes.errors) {
+          console.log(`Failed to seed entity with ID ${data.id || data.post_id}: ${entityFnRes.message} -- ${JSON.stringify(uploadRes.errors)}`);
+        }
       }
     }
     console.log('Entity seeding completed!');
