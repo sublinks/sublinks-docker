@@ -19,7 +19,7 @@ services:
       USE_LOCAL_CA: 1
       STAGING: 1
       NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE: 1
-      API_HOST: ${API_HOST:-sublinks}
+      API_HOST: ${API_HOST:-api}
     ports:
       - "80:8080"
       - "443:8443"
