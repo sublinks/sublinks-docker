@@ -18,7 +18,7 @@ services:
       SUBLINKS_DB_USERNAME: backend
       SUBLINKS_DB_PASSWORD: backend
       SUBLINKS_JWT_SECRET: YouShouldChangeThisItJustNeedsToBe64charactersLongUsingAlphaNum1
-      SUBLINKS_BASE_URL: https://demo.sublinks.org
+      SUBLINKS_BASE_URL: http://host.docker.internal
       SUBLINKS_PICTRS_URL: http://pictrs:8080
       FEDERATION_QUEUE_HOST: queue
       FEDERATION_QUEUE_PORT: 5672

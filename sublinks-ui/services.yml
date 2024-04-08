@@ -14,7 +14,7 @@ services:
     image: ghcr.io/sublinks/sublinks-frontend:main
     environment:
       - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=api:8080
-      - NEXT_PUBLIC_SUBLINKS_API_BASE_PUBLIC_URL=demo.sublinks.org
+      - NEXT_PUBLIC_SUBLINKS_API_BASE_PUBLIC_URL=host.docker.internal
       - NEXT_PUBLIC_HTTPS_ENABLED=true
     restart: always
     logging: *default-logging
