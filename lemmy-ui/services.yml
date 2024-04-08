@@ -16,7 +16,7 @@ services:
       #- LEMMY_UI_DEBUG=true
       - LEMMY_UI_HOST=0.0.0.0:3000
       - LEMMY_UI_DISABLE_CSP=true
-      - LEMMY_UI_LEMMY_INTERNAL_HOST=${API_HOST:-sublinks}:8080
+      - LEMMY_UI_LEMMY_INTERNAL_HOST=${API_HOST:-api}:8080
       - LEMMY_UI_LEMMY_EXTERNAL_HOST=demo.sublinks.org
     restart: always
     logging: *default-logging

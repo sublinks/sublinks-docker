@@ -13,13 +13,13 @@ services:
   ui:
     image: ghcr.io/sublinks/sublinks-frontend:main
     environment:
-      - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=sublinks:8080
+      - NEXT_PUBLIC_SUBLINKS_API_BASE_URL=api:8080
       - NEXT_PUBLIC_SUBLINKS_API_BASE_PUBLIC_URL=demo.sublinks.org
       - NEXT_PUBLIC_HTTPS_ENABLED=true
     restart: always
     logging: *default-logging
     depends_on:
-      sublinks:
+      api:
         condition: service_healthy
       federation:
         condition: service_healthy
