@@ -640,10 +640,22 @@ allPosts.forEach(post => {
 });
 
 const entities = [
-  ...communities,
-  ...posts,
-  ...comments,
-  ...likes
+  {
+    data: communities,
+    runParallel: true
+  },
+  {
+    data: posts,
+    runParallel: false
+  },
+  {
+    data: comments,
+    runParallel: false
+  },
+  {
+    data: likes,
+    runParallel: true
+  }
 ];
 
 module.exports = {

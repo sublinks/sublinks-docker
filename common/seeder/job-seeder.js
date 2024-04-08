@@ -32,15 +32,9 @@ const waitForApi = async seedFn => {
   }
 };
 
+// Create promise behind function call to prevent immediate processing
 const createSeedingPromise = fn =>
-  new Promise(async (resolve, reject) => {
-    try {
-      await fn();
-      resolve();
-    } catch (e) {
-      reject(e);
-    }
-  });
+  () => new Promise((resolve, reject) => fn().then(resolve).catch(e => reject(e)));
 
 const doesEntityAlreadyExist = async entity => {
   const { creator, data, type } = entity;
@@ -156,7 +150,6 @@ const insertSeedData = async () => {
     await runInitialSiteSetup();
 
     const userKeys = Object.keys(users);
-    const entityKeys = Object.keys(entities);
     const userCreationPromises = [];
 
     console.log('Seeding users...');
@@ -167,37 +160,58 @@ const insertSeedData = async () => {
       userCreationPromises.push(createSeedingPromise(() => createUser(user)));
     }
 
-    await Promise.allSettled(userCreationPromises);
+    await Promise.allSettled(userCreationPromises.map(promise => promise()));
     console.log('User seeding completed!');
 
     console.log('Seeding entities...');
-    for (let i = 0; i < entityKeys.length; i++) {
-      const entityKey = entityKeys[i];
-      const entity = entities[entityKey];
+    for (let i = 0; i < entities.length; i++) {
+      const entityProps = entities[i];
+      const { data, runParallel } = entityProps;
+      const entityPromises = [];
 
-      if (!await doesEntityAlreadyExist(entity)) {
-        const { creator, data, type } = entity;
-        console.log(`Running ${type}() for entity with ID ${data.id || data.post_id}`);
+      for (let l = 0; l < data.length; l++) {
+        const entity = data[l];
 
-        const { jwt } = await apiClient.login(creator.credentials);
-        apiClient.setAuth(jwt);
+        if (!await doesEntityAlreadyExist(entity)) {
+          const seedFn = async () => {
+            const uniqueApiClient = new SublinksClient(NEXT_PUBLIC_SUBLINKS_API_BASE_URL, { insecure: true });
 
-        if (data.image_url) {
-          const fileRes = await fetch(data.image_url);
-          const fileBuffer = Buffer.from(await fileRes.arrayBuffer());
-          const uploadRes = await apiClient.uploadImage({ image: fileBuffer });
+            const { creator, data, type } = entity;
+            console.log(`Running ${type}() for entity with ID ${data.id || data.post_id}`);
 
-          if (uploadRes.url) {
-            data.url = uploadRes.url;
-          } else if (uploadRes.errors) {
-            console.log(`Failed uploading image for post ${data.id}: ${uploadRes.message} -- ${JSON.stringify(uploadRes.errors)}`);
+            const { jwt } = await uniqueApiClient.login(creator.credentials);
+            uniqueApiClient.setAuth(jwt);
+
+            if (data.image_url) {
+              const fileRes = await fetch(data.image_url);
+              const fileBuffer = Buffer.from(await fileRes.arrayBuffer());
+              const uploadRes = await uniqueApiClient.uploadImage({ image: fileBuffer });
+
+              if (uploadRes.url) {
+                data.url = uploadRes.url;
+              } else if (uploadRes.errors) {
+                console.log(`Failed uploading image for post ${data.id}: ${uploadRes.message} -- ${JSON.stringify(uploadRes.errors)}`);
+              }
+            }
+
+            const entityFnRes = await uniqueApiClient[type](data);
+            if (entityFnRes.errors) {
+              console.log(`Failed to seed entity with ID ${data.id || data.post_id}: ${entityFnRes.message} -- ${JSON.stringify(entityFnRes.errors)}`);
+            }
+          }
+
+          if (runParallel) {
+            entityPromises.push(createSeedingPromise(seedFn));
+          } else {
+            await seedFn();
           }
         }
+      }
 
-        const entityFnRes = await apiClient[type](data);
-        if (entityFnRes.errors) {
-          console.log(`Failed to seed entity with ID ${data.id || data.post_id}: ${entityFnRes.message} -- ${JSON.stringify(uploadRes.errors)}`);
-        }
+      // Run in batches of 10
+      for (let k = 0; k < entityPromises.length; k += 10) {
+        const sliceOfPromises = entityPromises.slice(k, k + 10)
+        await Promise.allSettled(sliceOfPromises.map(promise => promise()));
       }
     }
     console.log('Entity seeding completed!');
