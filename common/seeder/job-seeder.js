@@ -84,7 +84,7 @@ const doesEntityAlreadyExist = async entity => {
       try {
         if (!likesCache[postId]) {
           // API gets upset if non-admins fetch likes for too many posts
-          apiClient.setAuth(adminJwt);
+          //apiClient.setAuth(adminJwt);
 
           const likesRes = await apiClient.listPostLikes({
             post_id: postId
