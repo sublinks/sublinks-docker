@@ -11,9 +11,12 @@ x-logging: &default-logging
 
 services:
   maindb:
-    image: mysql:latest
+    image: postgres:latest
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+      - POSTGRES_USER=backend
+      - PGUSER=backend
+      - POSTGRES_PASSWORD=backend
+      - POSTGRES_DB=backend
     volumes:
       - ./db:/docker-entrypoint-initdb.d
     restart: always
@@ -21,7 +24,7 @@ services:
     ports:
       - "3306:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "pg_isready", "-d", "backend"]
       interval: 15s
       timeout: 20s
       retries: 3
