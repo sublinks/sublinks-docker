@@ -12,7 +12,8 @@ services:
     restart: always
     environment:
       DB_TYPE: "postgres"
-      DB_DSN: "postgres://federation:federation@localhost:5432/federation?sslmode=disable"
+      DB_DSN: "postgres://federation:federation@localhost:5432/sublinks?sslmode=disable"
+      DB_SCHEMA: "federation"
       AMQP_SERVER_URL: "amqp://sublinks:sublinks@queue:5672"
       HOSTNAME: sublinks.org
       LISTEN_ADDR: ":8080"

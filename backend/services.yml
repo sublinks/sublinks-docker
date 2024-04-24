@@ -14,7 +14,7 @@ services:
     image: ghcr.io/sublinks/sublinks-api:main
     restart: always
     environment:
-      SUBLINKS_DB_URL: jdbc:postgresql://maindb:5432/backend
+      SUBLINKS_DB_URL: jdbc:postgresql://maindb:5432/sublinks
       SUBLINKS_DB_USERNAME: backend
       SUBLINKS_DB_PASSWORD: backend
       SUBLINKS_JWT_SECRET: YouShouldChangeThisItJustNeedsToBe64charactersLongUsingAlphaNum1
