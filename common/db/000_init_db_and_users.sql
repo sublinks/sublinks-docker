@@ -1,10 +1,10 @@
-# create databases
-CREATE DATABASE IF NOT EXISTS `backend`;
-CREATE DATABASE IF NOT EXISTS `federation`;
+-- create databases
+CREATE DATABASE backend;
+CREATE DATABASE federation;
 
-# create root user and grant rights
-CREATE USER 'backend'@'%' IDENTIFIED WITH caching_sha2_password BY 'backend';
-CREATE USER 'federation'@'%' IDENTIFIED WITH caching_sha2_password BY 'federation';
-GRANT ALL PRIVILEGES ON backend.* TO 'backend'@'%';
-GRANT ALL PRIVILEGES ON federation.* TO 'federation'@'%';
+-- create users and grant rights in postgres
+CREATE ROLE backend WITH LOGIN PASSWORD 'backend';
+CREATE ROLE federation WITH LOGIN PASSWORD 'federation';
+GRANT ALL PRIVILEGES ON DATABASE backend TO backend;
+GRANT ALL PRIVILEGES ON DATABASE federation TO federation;
 

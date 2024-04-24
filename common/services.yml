@@ -13,10 +13,7 @@ services:
   maindb:
     image: postgres:latest
     environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
-      - PGUSER=root
-      - POSTGRES_DB=backend
+      - POSTGRES_PASSWORD=postgres
     volumes:
       - ./db:/docker-entrypoint-initdb.d
     restart: always
