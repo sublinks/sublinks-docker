@@ -1,11 +1,11 @@
-* @sublinks/core-developers
-frontend/ @sublinks/sublinks-frontend-service @sublinks/core-developers 
-sublinks-ui/ @sublinks/sublinks-frontend-service @sublinks/core-developers 
-common/seeder/ @sublinks/sublinks-frontend-service @sublinks/core-developers 
-docker-compose.frontend.yml @sublinks/sublinks-frontend-service @sublinks/core-developers 
-federation/ @sublinks/sublinks-federation-service @sublinks/core-developers
-common/queue/ @sublinks/sublinks-federation-service @sublinks/core-developers 
-docker-compose.federation.yml @sublinks/sublinks-federation-service @sublinks/core-developers 
-backend/ @sublinks/sublinks-api-service @sublinks/core-developers
-docker-compose.backend.yml @sublinks/sublinks-api-service @sublinks/core-developers 
+* @sublinks/core-owners
+frontend/ @sublinks/sublinks-frontend-service @sublinks/core-owners
+sublinks-ui/ @sublinks/sublinks-frontend-service @sublinks/core-owners
+common/seeder/ @sublinks/sublinks-frontend-service @sublinks/core-owners
+docker-compose.frontend.yml @sublinks/sublinks-frontend-service @sublinks/core-owners
+federation/ @sublinks/sublinks-federation-service @sublinks/core-owners
+common/queue/ @sublinks/sublinks-federation-service @sublinks/core-owners
+docker-compose.federation.yml @sublinks/sublinks-federation-service @sublinks/core-owners
+backend/ @sublinks/sublinks-api-service @sublinks/core-owners
+docker-compose.backend.yml @sublinks/sublinks-api-service @sublinks/core-owners
 
