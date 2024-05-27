@@ -5,6 +5,6 @@
     "seed": "node ./job-seeder.js"
   },
   "dependencies": {
-    "sublinks-js-client": "^0.0.17"
+    "sublinks-js-client": "^0.0.18"
   }
 }
