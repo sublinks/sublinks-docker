@@ -1,6 +1,3 @@
-volumes:
-  letsencrypt:
-
 x-logging: &default-logging
   driver: "json-file"
   options:
